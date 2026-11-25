@@ -244,6 +244,8 @@ function EmailJsPanel(props: {
   const setEmailJs = useAppStore((s) => s.setEmailJs);
   const template = useAppStore((s) => s.template);
   const configured = isEmailJsConfigured(emailjs);
+  // Rozwinięcie liczone tylko raz — panel nie może się zwinąć sam w trakcie wpisywania konfiguracji.
+  const [startOpen] = useState(() => !configured);
   const [testTo, setTestTo] = useState('');
   const [testState, setTestState] = useState<{ kind: 'idle' | 'sending' | 'ok' } | { kind: 'error'; message: string }>({
     kind: 'idle',
@@ -268,7 +270,7 @@ function EmailJsPanel(props: {
 
   return (
     <Card className="p-0! overflow-hidden">
-      <details open={!configured} className="group">
+      <details open={startOpen} className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50">
           <span>
             <span className="font-bold text-slate-900">⚡ Automatyczna wysyłka (EmailJS)</span>
