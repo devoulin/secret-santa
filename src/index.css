@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+@theme {
+  --animate-wiggle: wiggle 1.4s ease-in-out infinite;
+  --animate-shake: shake 0.45s ease-in-out infinite;
+  --animate-pop: pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-fade-in: fade-in 0.35s ease-out both;
+
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(-7deg) scale(1);
+    }
+    50% {
+      transform: rotate(7deg) scale(1.06);
+    }
+  }
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0) rotate(0);
+    }
+    25% {
+      transform: translateX(-8px) rotate(-10deg);
+    }
+    75% {
+      transform: translateX(8px) rotate(10deg);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-stone-100 text-slate-800 antialiased;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Śnieg — patrz components/Snow.tsx */
+.snowflake {
+  position: absolute;
+  top: -2rem;
+  color: white;
+  user-select: none;
+  animation-name: snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes snowfall {
+  to {
+    transform: translate3d(var(--drift, 20px), var(--fall, 100vh), 0) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowflake {
+    display: none;
+  }
+}
