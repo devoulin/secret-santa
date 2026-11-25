@@ -1,24 +1,17 @@
 import { useMemo, useState } from 'react';
-import type { PersonKind } from '../domain/types';
-import { displayFamilyName, displayName, findPerson, resolveDelivery, type Delivery } from '../domain/families';
+import { PUBLIC_APP_URL, revealLinkBase } from '../config';
+import { displayFamilyName, displayName } from '../domain/families';
 import { buildMessage } from '../domain/message';
-import { encodeReveal, revealUrl } from '../domain/reveal';
+import { buildOutbox, type OutboxItem } from '../domain/outbox';
+import { revealUrl } from '../domain/reveal';
 import { EMAILJS_SEND_DELAY_MS, isEmailJsConfigured, sendViaEmailJs, sleep } from '../services/emailjs';
 import { gmailLink, mailtoLink } from '../services/mailLinks';
 import { type SendState, useAppStore } from '../store/useAppStore';
 import { PREVIEW_GIVER, PREVIEW_RECEIVER } from './MessageStep';
 import { Alert, Button, buttonClass, Card, Field, inputClass, StepHeader } from './ui';
 
-interface Row {
+interface Row extends OutboxItem {
   id: string;
-  giverName: string;
-  receiverName: string;
-  kind: PersonKind;
-  familyId: string;
-  familyName: string;
-  delivery: Delivery;
-  subject: string;
-  body: string;
   link: string;
 }
 
@@ -47,31 +40,12 @@ export function SendStep() {
 
   const rows = useMemo<Row[]>(() => {
     if (!draw) return [];
-    const result: Row[] = [];
-    for (const a of draw.assignments) {
-      const giver = findPerson(families, a.giverId);
-      const receiver = findPerson(families, a.receiverId);
-      if (!giver || !receiver) continue;
-      const giverName = displayName(giver.person);
-      const receiverName = displayName(receiver.person);
-      const delivery = resolveDelivery(giver);
-      const message = buildMessage(template, giverName, receiverName);
-      const code = encodeReveal({ giver: giverName, receiver: receiverName, budget: template.budget, date: template.eventDate });
-      result.push({
-        id: a.giverId,
-        giverName,
-        receiverName,
-        kind: giver.person.kind,
-        familyId: giver.family.id,
-        familyName: displayFamilyName(giver.family),
-        delivery,
-        // Rodzic z kilkorgiem dzieci dostanie kilka maili — temat musi je rozróżniać.
-        subject: delivery.viaParent ? `${message.subject} (dla: ${giverName})` : message.subject,
-        body: message.body,
-        link: revealUrl(code, location.href),
-      });
-    }
-    return result;
+    const linkBase = revealLinkBase();
+    return buildOutbox(families, draw.assignments, template).map((item) => ({
+      ...item,
+      id: item.giverId,
+      link: revealUrl(item.revealCode, linkBase),
+    }));
   }, [draw, families, template]);
 
   if (!draw) {
@@ -153,13 +127,20 @@ export function SendStep() {
         </p>
         <p>
           <strong>🔗 Link</strong> kopiuje wiadomość z tajnym linkiem bez pokazywania wyniku.
-          {isLocalhost() && (
-            <>
-              {' '}
-              <strong>Uwaga:</strong> aplikacja działa teraz lokalnie ({location.host}), więc linki otworzą się tylko
-              na tym komputerze. Żeby działały u innych, aplikację trzeba opublikować (np. GitHub Pages).
-            </>
-          )}
+          {isLocalhost() &&
+            (PUBLIC_APP_URL ? (
+              <>
+                {' '}
+                Linki prowadzą do wersji online (<strong>{PUBLIC_APP_URL}</strong>), więc działają u innych, mimo że
+                aplikacja działa teraz lokalnie.
+              </>
+            ) : (
+              <>
+                {' '}
+                <strong>Uwaga:</strong> aplikacja działa teraz lokalnie ({location.host}), więc linki otworzą się tylko
+                na tym komputerze. Ustaw <code>VITE_PUBLIC_URL</code> w pliku <code>.env</code> albo opublikuj aplikację.
+              </>
+            ))}
         </p>
       </Alert>
 

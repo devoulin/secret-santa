@@ -28,9 +28,13 @@ npm run build      # statyczny build w dist/ (do wrzucenia na dowolny hosting)
 
 ## Tajne linki
 
-Link `#/odkryj/<kod>` pokazuje jednej osobie jej wynik. Działa tylko wtedy, gdy aplikacja jest
-opublikowana (np. GitHub Pages). Linki wygenerowane na `localhost` otworzą się wyłącznie na tym komputerze.
+Link `#/odkryj/<kod>` pokazuje jednej osobie jej wynik. Linki zawsze prowadzą do adresu z
+`VITE_PUBLIC_URL` w pliku `.env` (obecnie https://devoulin.github.io/secret-santa/), więc działają u innych
+także wtedy, gdy losujesz w wersji lokalnej. Bez tej zmiennej linki prowadzą do bieżącego adresu strony.
 Kod jest zaciemniony (base64url), a nie zaszyfrowany.
+
+Gdy kilka osób ma ten sam adres e-mail (np. dziecko przez rodzica albo para ze wspólną skrzynką),
+temat wiadomości dostaje dopisek „(dla: imię)”, żeby maile nie skleiły się w jeden wątek.
 
 ## Dokumentacja
 
