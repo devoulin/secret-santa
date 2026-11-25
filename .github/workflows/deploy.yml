@@ -1,10 +1,10 @@
-# Testy + build + publikacja na GitHub Pages przy każdym pushu na main.
+# Testy + build + publikacja na GitHub Pages przy każdym pushu na master.
 # W ustawieniach repo: Settings → Pages → Source = "GitHub Actions".
 name: Deploy na GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
